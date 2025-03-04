@@ -18,9 +18,14 @@ type Book {
     link: String
 }
 
+type Auth {
+    token: ID!
+    user: User
+}
+
 type Query {
     getUser(_id: String): User
-    login(username: String, password: String): String
+    login(username: String, password: String): Auth
 }
 
 type Mutation {
