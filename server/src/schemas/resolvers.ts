@@ -1,15 +1,39 @@
-import { deleteBook, saveBook } from "../controllers/user-controller";
-import bookSchema, { IBookDocument } from "../models/Book";
-import User, { IUserDocument } from "../models/User";
+import { IBookDocument } from "../models/Book";
+import User from "../models/User";
 import { AuthenticationError, signToken } from "../services/auth";
+
+interface GetUserArgs {
+    _id: string;
+}
+
+interface LoginArgs {
+    username: string;
+    password: string;
+}
+
+interface CreateUserArgs {
+    username: string;
+    password: string;
+    email: string;
+}
+
+interface SaveBookArgs {
+    _id: string;
+    book: IBookDocument;
+}
+
+interface DeleteBookArgs {
+    userId: string;
+    bookId: string;
+}
 
 const resolvers = {
     Query: {
-        getUser: async (_id: string)=> {
-            return User.findOne({_id});
+        getUser: async (_parent: any, { _id }: GetUserArgs) => {
+            return await User.findOne({ _id });
         },
-        login: async (username: string, password: string) => {
-            const user = await User.findOne({username})
+        login: async (_parent: any, { username, password }: LoginArgs) => {
+            const user = await User.findOne({ username })
 
             if (!user) {
                 throw new AuthenticationError('Could not authenticate user.');
@@ -17,24 +41,47 @@ const resolvers = {
 
             const correctPw = await user.isCorrectPassword(password);
 
-            if (!correctPw){
+            if (!correctPw) {
                 throw new AuthenticationError('Could not authenticate user.');
             }
 
             const token = signToken(user.username, user.email, user._id);
 
-            return {token, user};
+            return { token, user };
         },
     },
     Mutation: {
-        createUser: async (username: string, password: string, email: string) => {
+        createUser: async (_parent: any, { username, password, email }: CreateUserArgs) => {
+            const user = await User.create({ username, password, email });
 
+            const token = signToken(user.username, user.email, user._id);
+
+            return { token, user };
         },
-        saveBook: async (_id: string, book: IBookDocument) => {
+        saveBook: async (_parent: any, { _id, book }: SaveBookArgs, context: any) => {
+            if (context.user) {
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id },
+                    { $addToSet: { savedBooks: book } },
+                    { new: true, runValidators: true },
+                );
 
+                return updatedUser;
+            }
+
+            throw new AuthenticationError('Need to be logged in to save a book');
         },
-        deleteBook: async (userId: string, bookId: string) => {
+        deleteBook: async (_parent: any, { userId, bookId }: DeleteBookArgs, context: any) => {
+            if (context.user) {
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: userId },
+                    { $pull: { savedBooks: { bookId } } },
+                    { new: true },
+                );
 
+                return updatedUser;
+            }
+            throw new AuthenticationError('Need to be logged in to delete a book');
         },
 
     }
