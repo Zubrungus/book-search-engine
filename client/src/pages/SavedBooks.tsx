@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Container, Card, Button, Row, Col } from 'react-bootstrap';
 
 import { getMe, deleteBook } from '../utils/API';
+import { QUERY_USER } from '../utils/queries';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 import type { User } from '../models/User';
