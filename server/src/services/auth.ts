@@ -4,12 +4,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const authenticateToken = ({ req }: any) => {
-  let token = req.body.token || req.query.token || req.headers.authorization;
-
+  console.log('beginning of authenticateToken')
+  let token = req.headers.authorization;
+  console.log(`${token}`);
   if (req.headers.authorization) {
     token = token.split(' ').pop().trim();
   }
-
+  console.log(`${token}`);
   if (!token) {
     return req;
   }

@@ -1,6 +1,6 @@
-import { IBookDocument } from "../models/Book";
-import User from "../models/User";
-import { AuthenticationError, signToken } from "../services/auth";
+import { IBookDocument } from "../models/Book.js";
+import User from "../models/User.js";
+import { AuthenticationError, signToken } from "../services/auth.js";
 
 interface GetUserArgs {
     _id: string;
@@ -32,6 +32,8 @@ const resolvers = {
         getUser: async (_parent: any, { _id }: GetUserArgs) => {
             return await User.findOne({ _id });
         },
+    },
+    Mutation: {
         login: async (_parent: any, { username, password }: LoginArgs) => {
             const user = await User.findOne({ username })
 
@@ -49,8 +51,6 @@ const resolvers = {
 
             return { token, user };
         },
-    },
-    Mutation: {
         createUser: async (_parent: any, { username, password, email }: CreateUserArgs) => {
             const user = await User.create({ username, password, email });
 
@@ -59,6 +59,7 @@ const resolvers = {
             return { token, user };
         },
         saveBook: async (_parent: any, { _id, book }: SaveBookArgs, context: any) => {
+            console.log(context.user);
             if (context.user) {
                 const updatedUser = await User.findOneAndUpdate(
                     { _id },
