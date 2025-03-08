@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const authenticateToken = ({ req }: any) => {
+  //get token from request header
   let token = req.headers.authorization;
   if (req.headers.authorization) {
     token = token.split(' ').pop().trim();
@@ -11,9 +12,8 @@ export const authenticateToken = ({ req }: any) => {
   if (!token) {
     return req;
   }
-
   try {
-
+    //verify token and return user data
     const data = jwt.verify(token, process.env.JWT_SECRET_KEY || '', { maxAge: '2hr' });
     req.user = data;
   } catch (err) {
@@ -23,6 +23,7 @@ export const authenticateToken = ({ req }: any) => {
 };
 
 export const signToken = (username: string, email: string, _id: unknown) => {
+  //sign token using user data and secret key
   const payload = { username, email, _id };
   const secretKey = process.env.JWT_SECRET_KEY || '';
 

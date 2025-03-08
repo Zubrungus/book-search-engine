@@ -1,3 +1,4 @@
+//graphql type definitions used in communicating with client
 const typeDefs = `
 type User {
     _id: String!
