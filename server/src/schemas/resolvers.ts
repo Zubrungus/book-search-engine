@@ -46,7 +46,6 @@ const resolvers = {
             if (!correctPw) {
                 throw new AuthenticationError('Could not authenticate user.');
             }
-
             const token = signToken(user.username, user.email, user._id);
 
             return { token, user };
@@ -59,7 +58,6 @@ const resolvers = {
             return { token, user };
         },
         saveBook: async (_parent: any, { _id, book }: SaveBookArgs, context: any) => {
-            console.log(context.user);
             if (context.user) {
                 const updatedUser = await User.findOneAndUpdate(
                     { _id },
